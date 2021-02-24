@@ -6,8 +6,7 @@
   "description": "HotFix Resolution",
   "keywords": [],
   "dependencies": {
-    "com.unity.ext.nunit": "1.0.0",
-    "nuget.mono-cecil": "0.1.6-preview"
+    "com.unity.ext.nunit": "1.0.0"
   },
   "repository": {
   }

@@ -12,17 +12,17 @@ using System.Linq;
 
 namespace IFix
 {
-    public static class Program
+    public static class IFixTool
     {
         static void usage()
         {
-            Console.WriteLine("Usage:");
-            Console.WriteLine("IFix -inject core_assmbly_path assmbly_path config_path patch_file_output_path"
+            UnityEngine.Debug.Log("Usage:");
+            UnityEngine.Debug.Log("IFix -inject core_assmbly_path assmbly_path config_path patch_file_output_path"
                 + " injected_assmbly_output_path [search_path1, search_path2 ...]");
-            Console.WriteLine("IFix -inherit_inject core_assmbly_path assmbly_path config_path "
+            UnityEngine.Debug.Log("IFix -inherit_inject core_assmbly_path assmbly_path config_path "
                 + "patch_file_output_path injected_assmbly_output_path inherit_assmbly_path "
                 + "[search_path1, search_path2 ...]");
-            Console.WriteLine("IFix -patch core_assmbly_path assmbly_path injected_assmbly_path"
+            UnityEngine.Debug.Log("IFix -patch core_assmbly_path assmbly_path injected_assmbly_path"
                 + " config_path patch_file_output_path [search_path1, search_path2 ...]");
         }
 
@@ -33,7 +33,7 @@ namespace IFix
         }
 
         // #lizard forgives
-        static void Main(string[] args)
+        public static void Execute(string[] args)
         {
             if (!argsValid(args))
             {
@@ -60,7 +60,7 @@ namespace IFix
                 catch
                 {
                     //如果读取不到符号则不读
-                    Console.WriteLine("Warning: read " + assmeblyPath + " with symbol fail");
+                    UnityEngine.Debug.Log("Warning: read " + assmeblyPath + " with symbol fail");
                     //写入的时候用这个标志
                     readSymbols = false;
                     assembly = AssemblyDefinition.ReadAssembly(assmeblyPath,
@@ -76,7 +76,7 @@ namespace IFix
                 {
                     try
                     {
-                        //Console.WriteLine("searchPath:" + path);
+                        //UnityEngine.Debug.Log("searchPath:" + path);
                         resolver.AddSearchDirectory(path);
                     } catch { }
                 }
@@ -101,7 +101,7 @@ namespace IFix
                     if (tranlater.Process(assembly, ilfixAassembly, configure, mode)
                         == CodeTranslator.ProcessResult.Processed)
                     {
-                        Console.WriteLine(dllName + " process yet!");
+                        UnityEngine.Debug.Log(dllName + " process yet!");
                         return;
                     }
 
@@ -119,17 +119,17 @@ namespace IFix
                         == CodeTranslator.ProcessResult.Processed)
                     {
                         //发现程序集已经被注入，主要是防止已经注入的函数包含的注入逻辑会导致死循环
-                        Console.WriteLine("Error: the new assembly must not be inject, please reimport the project!");
+                        UnityEngine.Debug.Log("Error: the new assembly must not be inject, please reimport the project!");
                         return;
                     }
 
                     tranlater.Serialize(args[5]);
-                    Console.WriteLine("output: " + args[5]);
+                    UnityEngine.Debug.Log("output: " + args[5]);
                 }
             }
             catch(Exception e)
             {
-                Console.WriteLine("Unhandled Exception:\r\n" + e);
+                UnityEngine.Debug.Log("Unhandled Exception:\r\n" + e);
                 return;
             }
             finally
@@ -151,7 +151,7 @@ namespace IFix
                     oldAssembly.MainModule.SymbolReader.Dispose();
                 }
             }
-            Console.WriteLine(dllName + " process success");
+            UnityEngine.Debug.Log(dllName + " process success");
         }
     }
 }

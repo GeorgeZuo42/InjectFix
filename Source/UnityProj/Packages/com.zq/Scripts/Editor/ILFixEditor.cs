@@ -68,80 +68,7 @@ namespace IFix.Editor
         //system("mono ifix.exe [args]")
         public static void CallIFix(List<string> args)
         {
-#if UNITY_EDITOR_OSX
-            var mono_path = Path.Combine(Path.GetDirectoryName(typeof(UnityEngine.Debug).Module.FullyQualifiedName),
-                "../MonoBleedingEdge/bin/mono");
-            if(!File.Exists(mono_path))
-            {
-                mono_path = Path.Combine(Path.GetDirectoryName(typeof(UnityEngine.Debug).Module.FullyQualifiedName),
-                    "../../MonoBleedingEdge/bin/mono");
-            }
-#elif UNITY_EDITOR_WIN
-            var mono_path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName),
-                "Data/MonoBleedingEdge/bin/mono.exe");
-#endif
-            if (!File.Exists(mono_path))
-            {
-                UnityEngine.Debug.LogError("can not find mono!");
-            }
-            var inject_tool_path = "./IFixToolKit/IFix.exe";
-            //"--runtime = v4.0.30319"
-            if (!File.Exists(inject_tool_path))
-            {
-                UnityEngine.Debug.LogError("please install the ToolKit");
-                return;
-            }
-
-            Process hotfix_injection = new Process();
-            hotfix_injection.StartInfo.FileName = mono_path;
-#if UNITY_5_6_OR_NEWER
-            hotfix_injection.StartInfo.Arguments = "--debug --runtime=v4.0.30319 \"" + inject_tool_path + "\" \""
-#else
-            hotfix_injection.StartInfo.Arguments = "--debug \"" + inject_tool_path + "\" \""
-#endif
-                + string.Join("\" \"", args.ToArray()) + "\"";
-            hotfix_injection.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            hotfix_injection.StartInfo.RedirectStandardOutput = true;
-            hotfix_injection.StartInfo.UseShellExecute = false;
-            hotfix_injection.StartInfo.CreateNoWindow = true;
-            hotfix_injection.Start();
-
-            //UnityEngine.Debug.Log(hotfix_injection.StartInfo.FileName);
-            //UnityEngine.Debug.Log(hotfix_injection.StartInfo.Arguments);
-
-            StringBuilder exceptionInfo = null;
-            while(!hotfix_injection.StandardOutput.EndOfStream)
-            {
-                string line = hotfix_injection.StandardOutput.ReadLine();
-                if (exceptionInfo != null)
-                {
-                    exceptionInfo.AppendLine(line);
-                }
-                else
-                {
-                    if (line.StartsWith("Warning:"))
-                    {
-                        UnityEngine.Debug.LogWarning(line);
-                    }
-                    else if (line.StartsWith("Error:"))
-                    {
-                        UnityEngine.Debug.LogError(line);
-                    }
-                    else if (line.StartsWith("Unhandled Exception:"))
-                    {
-                        exceptionInfo = new StringBuilder(line);
-                    }
-                    else
-                    {
-                        UnityEngine.Debug.Log(line);
-                    }
-                }
-            }
-            hotfix_injection.WaitForExit();
-            if (exceptionInfo != null)
-            {
-                UnityEngine.Debug.LogError(exceptionInfo);
-            }
+            IFixTool.Execute(args.ToArray());
         }
 
         [MenuItem("InjectFix/Inject", false, 1)]
@@ -284,7 +211,7 @@ namespace IFix.Editor
             if (hasSomethingToDo)
             {
 
-                var core_path = "./Assets/Plugins/IFix.Core.dll";
+                var core_path = $"./Library/{GetScriptAssembliesFolder()}/IFix.Core.dll";
                 var assembly_path = string.Format("./Library/{0}/{1}.dll", targetAssembliesFolder, assembly);
                 var patch_path = string.Format("./{0}.ill.bytes", assembly);
                 List<string> args = new List<string>() { "-inject", core_path, assembly_path,
@@ -789,9 +716,7 @@ namespace IFix.Editor
         /// <param name="assemblyCSharpPath">程序集路径</param>
         /// <param name="corePath">IFix.Core.dll所在路径</param>
         /// <param name="patchPath">生成的patch的保存路径</param>
-        public static void GenPatch(string assembly, string assemblyCSharpPath
-            = "./Library/ScriptAssemblies/Assembly-CSharp.dll", 
-            string corePath = "./Assets/Plugins/IFix.Core.dll", string patchPath = "Assembly-CSharp.patch.bytes")
+        public static void GenPatch(string assembly, string assemblyCSharpPath, string corePath, string patchPath = "Assembly-CSharp.patch.bytes")
         {
             var patchMethods = Configure.GetTagMethods(typeof(PatchAttribute), assembly).ToList();
             var genericMethod = patchMethods.FirstOrDefault(m => hasGenericParameter(m));
@@ -858,7 +783,7 @@ namespace IFix.Editor
                 foreach (var assembly in injectAssemblys)
                 {
                     var assembly_path = string.Format("./Library/{0}/{1}.dll", GetScriptAssembliesFolder(), assembly);
-                    GenPatch(assembly, assembly_path, "./Assets/Plugins/IFix.Core.dll",
+                    GenPatch(assembly, assembly_path, $"./Library/{GetScriptAssembliesFolder()}/IFix.Core.dll",
                         string.Format("{0}.patch.bytes", assembly));
                 }
             }
