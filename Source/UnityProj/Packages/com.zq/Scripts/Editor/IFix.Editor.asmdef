@@ -1,0 +1,17 @@
+{
+    "name": "IFix.Editor",
+    "references": [
+        "GUID:e60f678011781e047a4c661694340652"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
