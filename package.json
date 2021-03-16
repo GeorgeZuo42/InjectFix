@@ -1,0 +1,13 @@
+{
+  "name": "com.rop.injectfix",
+  "displayName": "Inject Fix",
+  "author": "左棋",
+  "version": "1.0.0",
+  "unity": "2018.4",
+  "description": "HotFix Resolution 修改了腾讯版本成UPM版本，依赖修改为unity带的库",
+  "keywords": [],
+  "dependencies": {
+    "com.unity.ext.nunit": "1.0.0",
+    "nuget.mono-cecil": "0.1.6-preview"
+  }
+}
